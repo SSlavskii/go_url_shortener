@@ -5,10 +5,11 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestUrlHandler(t *testing.T) {
+func TestPostHandler(t *testing.T) {
 	type want struct {
 		// contentType string
 		statusCode int
@@ -28,11 +29,14 @@ func TestUrlHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+
 			request := httptest.NewRequest(http.MethodPost, tt.request, nil)
-			w := httptest.NewRecorder()
-			h := http.HandlerFunc(UrlHandler)
-			h.ServeHTTP(w, request)
-			result := w.Result()
+			rec := httptest.NewRecorder()
+			c := e.NewContext(request, rec)
+			PostHandler(c)
+			result := rec.Result()
+			defer result.Body.Close()
 
 			assert.Equal(t, tt.want.statusCode, result.StatusCode)
 		})
