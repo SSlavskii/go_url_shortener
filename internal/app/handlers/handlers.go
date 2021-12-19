@@ -11,11 +11,11 @@ import (
 )
 
 type Handler struct {
-	storage storage.Storage
+	storage storage.Storager
 }
 
-func New(s storage.Storage) Handler {
-	return Handler{storage: s}
+func New(s storage.Storager) *Handler {
+	return &Handler{storage: s}
 }
 
 func (h *Handler) GetHandler(e echo.Context) error {

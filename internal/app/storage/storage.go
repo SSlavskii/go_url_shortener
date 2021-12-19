@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-type Storage interface {
+type Storager interface {
 	GetFullURLFromID(urlID int) (string, error)
 	GetIDFromFullURL(url string) (string, error)
 }
@@ -17,10 +17,9 @@ type SimpleStorage struct {
 
 func (s *SimpleStorage) GetFullURLFromID(urlID int) (string, error) {
 	if urlID >= len(s.IntToURL) {
-		return "ya.ru", errors.New("NO such id")
-	} else {
-		return s.IntToURL[urlID], nil
+		return "", errors.New("NO such id")
 	}
+	return s.IntToURL[urlID], nil
 }
 
 func (s *SimpleStorage) GetIDFromFullURL(rawURL string) (string, error) {
@@ -35,8 +34,7 @@ func (s *SimpleStorage) GetIDFromFullURL(rawURL string) (string, error) {
 }
 
 func New() *SimpleStorage {
-	var s SimpleStorage
-	s.URLToInt = make(map[string]int)
-	s.IntToURL = make([]string, 0)
-	return &s
+	return &SimpleStorage{
+		URLToInt: make(map[string]int),
+	}
 }
