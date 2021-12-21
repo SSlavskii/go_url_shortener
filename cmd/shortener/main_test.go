@@ -9,11 +9,18 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/SSlavskii/go_url_shortener/internal/app/config"
+
 	"github.com/SSlavskii/go_url_shortener/internal/app/handlers"
 	"github.com/SSlavskii/go_url_shortener/internal/app/storage"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
+
+var testConfig = config.Config{
+	ServerAdress: ":8080",
+	BaseURL:      "http://localhost:8080",
+}
 
 func TestPostHandler(t *testing.T) {
 	type want struct {
@@ -45,7 +52,7 @@ func TestPostHandler(t *testing.T) {
 			request := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("ya.ru"))
 			rec := httptest.NewRecorder()
 			c := e.NewContext(request, rec)
-			h := handlers.New(tt.storage)
+			h := handlers.New(tt.storage, testConfig)
 			h.PostHandler(c)
 			result := rec.Result()
 			defer result.Body.Close()
@@ -93,7 +100,7 @@ func TestPostApiShortenHandler(t *testing.T) {
 			request.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(request, rec)
-			h := handlers.New(tt.storage)
+			h := handlers.New(tt.storage, testConfig)
 			h.PostAPIShortenHandler(c)
 			result := rec.Result()
 			defer result.Body.Close()
@@ -139,7 +146,7 @@ func TestGetHandler(t *testing.T) {
 			request := httptest.NewRequest(http.MethodGet, tt.request, nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(request, rec)
-			h := handlers.New(tt.storage)
+			h := handlers.New(tt.storage, testConfig)
 			h.GetHandler(c)
 			result := rec.Result()
 			defer result.Body.Close()

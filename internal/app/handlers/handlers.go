@@ -7,7 +7,9 @@ import (
 	"path"
 	"strconv"
 
+	"github.com/SSlavskii/go_url_shortener/internal/app/config"
 	"github.com/SSlavskii/go_url_shortener/internal/app/storage"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -21,10 +23,11 @@ type APIShortenResult struct {
 
 type Handler struct {
 	storage storage.Storager
+	config  config.Config
 }
 
-func New(s storage.Storager) *Handler {
-	return &Handler{storage: s}
+func New(s storage.Storager, cfg config.Config) *Handler {
+	return &Handler{storage: s, config: cfg}
 }
 
 func (h *Handler) GetHandler(e echo.Context) error {
@@ -53,7 +56,7 @@ func (h *Handler) PostHandler(e echo.Context) error {
 	}
 	e.Response().Header().Add("Content-Type", "text/plain")
 	e.Response().Header().Add("Accept-Charset", "utf-8")
-	return e.String(201, "http://localhost:8080/"+shortURL)
+	return e.String(201, h.config.BaseURL+"/"+shortURL)
 }
 
 func (h *Handler) PostAPIShortenHandler(e echo.Context) error {
@@ -70,7 +73,6 @@ func (h *Handler) PostAPIShortenHandler(e echo.Context) error {
 		return echo.NewHTTPError(400, "No url payload")
 	}
 
-	println(url.RawURL)
 	rawURL := url.RawURL
 	shortURL, err := h.storage.GetIDFromFullURL(string(rawURL))
 
@@ -79,7 +81,7 @@ func (h *Handler) PostAPIShortenHandler(e echo.Context) error {
 	}
 
 	result := APIShortenResult{
-		ShortURL: "http://localhost:8080/" + shortURL,
+		ShortURL: h.config.BaseURL + "/" + shortURL,
 	}
 
 	e.Response().Header().Add("Content-Type", echo.MIMEApplicationJSON)
