@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"path"
@@ -9,6 +10,14 @@ import (
 	"github.com/SSlavskii/go_url_shortener/internal/app/storage"
 	"github.com/labstack/echo/v4"
 )
+
+type APIShortenPayload struct {
+	RawURL string `json:"url"`
+}
+
+type APIShortenResult struct {
+	ShortURL string `json:"result"`
+}
 
 type Handler struct {
 	storage storage.Storager
@@ -42,8 +51,38 @@ func (h *Handler) PostHandler(e echo.Context) error {
 	if err != nil {
 		return echo.NewHTTPError(400, err.Error())
 	}
-	e.Response().Header().Add("Content-Type", "application/json")
+	e.Response().Header().Add("Content-Type", "text/plain")
 	e.Response().Header().Add("Accept-Charset", "utf-8")
-	e.Response().WriteHeader(201)
 	return e.String(201, "http://localhost:8080/"+shortURL)
+}
+
+func (h *Handler) PostAPIShortenHandler(e echo.Context) error {
+	defer e.Request().Body.Close()
+	url := APIShortenPayload{}
+	body, err := io.ReadAll(e.Request().Body)
+	if err != nil {
+		return echo.NewHTTPError(400, err.Error())
+	}
+	if err := json.Unmarshal(body, &url); err != nil {
+		return echo.NewHTTPError(400, "Error binding payload")
+	}
+	if url.RawURL == "" {
+		return echo.NewHTTPError(400, "No url payload")
+	}
+
+	println(url.RawURL)
+	rawURL := url.RawURL
+	shortURL, err := h.storage.GetIDFromFullURL(string(rawURL))
+
+	if err != nil {
+		return echo.NewHTTPError(400, err.Error())
+	}
+
+	result := APIShortenResult{
+		ShortURL: "http://localhost:8080/" + shortURL,
+	}
+
+	e.Response().Header().Add("Content-Type", echo.MIMEApplicationJSON)
+	e.Response().Header().Add("Accept-Charset", "utf-8")
+	return e.JSON(201, result)
 }

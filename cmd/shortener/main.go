@@ -13,5 +13,6 @@ func main() {
 
 	e.GET("/:url_id", h.GetHandler)
 	e.POST("/", h.PostHandler)
+	e.POST("/api/shorten", h.PostAPIShortenHandler)
 	e.Logger.Fatal(e.Start(":8080"))
 }
