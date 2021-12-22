@@ -1,6 +1,8 @@
 package config
 
 import (
+	"flag"
+
 	"github.com/caarlos0/env/v6"
 )
 
@@ -15,5 +17,13 @@ func New() (*Config, error) {
 	if err := env.Parse(&cfg); err != nil {
 		return &cfg, err
 	}
+	readFlags(&cfg)
 	return &cfg, nil
+}
+
+func readFlags(cfg *Config) {
+	flag.StringVar(&cfg.ServerAdress, "a", cfg.ServerAdress, "SERVER_ADDRESS")
+	flag.StringVar(&cfg.BaseURL, "b", cfg.BaseURL, "BASE_URL")
+	flag.StringVar(&cfg.FileStoragePath, "f", cfg.FileStoragePath, "FILE_STORAGE_PATH")
+	flag.Parse()
 }
