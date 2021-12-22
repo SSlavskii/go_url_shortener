@@ -10,7 +10,7 @@ import (
 func main() {
 	cfg, _ := config.New()
 	e := echo.New()
-	s := storage.New()
+	s, _ := storage.New(cfg.FileStoragePath)
 	h := handlers.New(s, *cfg)
 
 	e.GET("/:url_id", h.GetHandler)
